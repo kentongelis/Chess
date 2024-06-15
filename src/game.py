@@ -2,26 +2,30 @@ import pygame
 from const import *
 from board import Board
 from dragger import Dragger
+from config import Config
 
 
 class Game:
 
     def __init__(self):
+        self.next_player = "white"
+        self.hovered_sqr = None
         self.board = Board()
         self.dragger = Dragger()
+        self.config = Config()
 
     # Show methods
 
     def show_bg(self, surface):
+        theme = self.config.theme
+
         for row in range(ROWS):
             for col in range(COLS):
-                if (row + col) % 2 == 0:
-                    color = (234, 235, 200)  # light green
-                else:
-                    color = (119, 154, 88)  # dark green
-
+                # color
+                color = theme.bg.light if (row + col) % 2 == 0 else theme.bg.dark
+                # rect
                 rect = (col * SQSIZE, row * SQSIZE, SQSIZE, SQSIZE)
-
+                # blit
                 pygame.draw.rect(surface, color, rect)
 
     def show_pieces(self, surface):
@@ -63,3 +67,40 @@ class Game:
                 )
                 # blit
                 pygame.draw.rect(surface, color, rect)
+
+    def show_last_moves(self, surface):
+        if self.board.last_move:
+            initial = self.board.last_move.initial
+            final = self.board.last_move.final
+
+            for pos in [initial, final]:
+                # color
+                color = (
+                    (244, 247, 116) if (pos.row + pos.col) % 2 == 0 else (172, 195, 51)
+                )
+                # rect
+                rect = (pos.col * SQSIZE, pos.row * SQSIZE, SQSIZE, SQSIZE)
+                # blit
+                pygame.draw.rect(surface, color, rect)
+
+    def show_hover(self, surface):
+        if self.hovered_sqr:
+            # color
+            color = (180, 180, 180)
+            # rect
+            rect = (
+                self.hovered_sqr.col * SQSIZE,
+                self.hovered_sqr.row * SQSIZE,
+                SQSIZE,
+                SQSIZE,
+            )
+            # blit
+            pygame.draw.rect(surface, color, rect, width=3)
+
+    # other methods
+
+    def next_turn(self):
+        self.next_player = "white" if self.next_player == "black" else "black"
+
+    def set_hover(self, row, col):
+        self.hovered_sqr = self.board.squares[row][col]
