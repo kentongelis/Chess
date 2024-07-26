@@ -48,7 +48,7 @@ class Main:
                         piece = board.squares[clicked_row][clicked_col].piece
                         # valid piece (color) ?
                         if piece.color == game.next_player:
-                            board.calc_moves(piece, clicked_row, clicked_col)
+                            board.calc_moves(piece, clicked_row, clicked_col, bool=True)
                             dragger.save_initial(event.pos)
                             dragger.drag_piece(piece)
                             # show methods
@@ -89,7 +89,16 @@ class Main:
 
                         # valid move ?
                         if board.valid_move(dragger.piece, move):
+                            # normal capture
+                            captured = board.squares[released_row][
+                                released_col
+                            ].has_piece()
+
                             board.move(dragger.piece, move)
+
+                            board.set_true_en_passant(dragger.piece)
+                            # sounds
+                            game.play_sound(captured)
                             # show methods
                             game.show_bg(screen)
                             game.show_last_moves(screen)
@@ -98,6 +107,20 @@ class Main:
                             game.next_turn()
 
                     dragger.undrag_peice()
+
+                # key press
+                elif event.type == pygame.KEYDOWN:
+
+                    # changing themes
+                    if event.key == pygame.K_t:
+                        game.change_theme()
+
+                    # restart game
+                    if event.key == pygame.K_r:
+                        game.reset()
+                        game = self.game
+                        dragger = game.dragger
+                        board = game.board
 
                 # quit application
                 elif event.type == pygame.QUIT:
